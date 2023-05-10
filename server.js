@@ -29,7 +29,13 @@ app.use(passport.initialize());
 
 require('./config/passport')(passport); 
 
+
+
 app.use('/api/users', users); 
+
+app.use('/test', (req, res) => {
+    res.send({ message: "This is a test..."})
+})
 
 const port = process.env.PORT || 8080; 
 
