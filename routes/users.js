@@ -8,7 +8,7 @@ const passport = require('passport');
 const validateLoginInput = require('../validations/login'); 
 const validateRegisterInput = require('../validations/register'); 
 
-const User = require('../models/User.js'); 
+const users = require('../models/User.js'); 
 
 router.post('/register', (req, res) => {
     const { errors, isValid } = validateRegisterInput(req.body); 
@@ -16,12 +16,12 @@ router.post('/register', (req, res) => {
     if(!isValid) {
         return res.status(400).json(errors);
     }
-    User.findById({ email: req.body.email}).then(user => {
+    users.findById({ email: req.body.email}).then(user => {
         if(user) {
             return res.status(404).json({ email: "Email already exists"});
 
         } else {
-            const newUser = new User ({
+            const newUser = new user ({
                 name: req.body.name,
                 email: req.body.email,
                 password: req.body.password
@@ -51,7 +51,7 @@ router.post('/login', (req, res) => {
     const email = req.body.email; 
     const password = req.body.password; 
 
-    User.findOne({ email }).then(user => {
+    users.findOne({ email }).then(user => {
         if(!user) {
             return res.status(404).json({ email: "Email not found"});
         }
