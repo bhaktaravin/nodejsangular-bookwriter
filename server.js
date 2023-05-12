@@ -1,43 +1,24 @@
-const express = require('express'); 
-const mongoose = require('mongoose'); 
-const bodyParser = require('body-parser'); 
-const passport = require('passport'); 
+const express = require("express");
+const mongoose = require("mongoose");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
+const app = express();
+require("dotenv").config({ path: "./config.env" });
 
-const users = require('./routes/users'); 
+const PORT = process.env.PORT || 5000;
 
-const app = express(); 
-
-app.use(
-    bodyParser.urlencoded({
-        extended: false
-    })
-); 
-
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 
-const db = require('./config/keys').mongoURI; 
+app.use("/", (req, res) => {
+  res.send("Testing...");
+});
 
-mongoose.connect(
-    db, 
-    { useNewUrlParser: true }
-)
-.then(() => console.log('MongoDB Connected...')) 
-.catch(err => console.log(err));
+app.use("/users", require("./routes/routes"));
 
-app.use(passport.initialize()); 
-
-require('./config/passport')(passport); 
-
-
-
-app.use('/api/users', users); 
-
-app.use('/test', (req, res) => {
-    res.send({ message: "This is a test..."})
-})
-
-const port = process.env.PORT || 8080; 
-
-app.listen(port, () => console.log(`Server is running on Port: ${port}`)); 
-
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
