@@ -1,11 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
+const bcrypt = require('bcryptjs'); 
+
 
 // POST endpoint to create a new user
-router.post("/users", async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
     const { username, email, password, isAdmin } = req.body;
+    
+    const existingUser = await User.findOne({ $or: [{ username: req.body.username }, { email: req.body.email }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username or email is already taken.' });
+    }
+    
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     // Create a new user instance
     const newUser = new User({
@@ -41,6 +51,24 @@ router.get("/users", async (req, res) => {
     console.error(error);
     res.status(500).send({ message: "Server Error" });
   }
+});
+
+
+router.post('/login', async(req, res) => {
+    const { username, password } = req.body; 
+  try { 
+    const user = await User.findOne({ username }); 
+    if(!user || user.password !== password) {
+      res.status(401).json({ message: "Invalid username or password" }); 
+      return;
+    }
+    
+    res.json({ message: 'Login Successful', user});
+  } catch(error) {
+    console.error(error); 
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+  
 });
 
 // GET endpoint to get user profile
