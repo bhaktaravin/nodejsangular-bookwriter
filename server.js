@@ -17,7 +17,7 @@ app.use("/", (req, res) => {
   res.send("Testing...");
 });
 
-app.use("/users", require("./routes/routes"));
+app.use("/api", require("./routes/routes"));
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
