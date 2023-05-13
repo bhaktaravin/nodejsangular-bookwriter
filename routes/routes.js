@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require('bcryptjs'); 
-
+const auth = require('../middleware/auth');
 
 // POST endpoint to create a new user
 router.post("/register", async (req, res) => {
@@ -36,7 +36,7 @@ router.post("/register", async (req, res) => {
 });
 
 // GET endpoint to get all users (only accessible to admin users)
-router.get("/users", async (req, res) => {
+router.get("/users", auth, async (req, res) => {
   try {
     // Check if user is an admin
     if (!req.user.isAdmin) {
@@ -57,13 +57,15 @@ router.get("/users", async (req, res) => {
 router.post('/login', async(req, res) => {
     const { username, password } = req.body; 
   try { 
-    const user = await User.findOne({ username }); 
+    const user = await User.findByCredentials(req.body.username, req.body.password );
     if(!user || user.password !== password) {
       res.status(401).json({ message: "Invalid username or password" }); 
       return;
     }
+    const token = jwt.sign({ _id: user._id.toString() }, 'secretKey');
+
+   res.send({ user, token });
     
-    res.json({ message: 'Login Successful', user});
   } catch(error) {
     console.error(error); 
     res.status(500).json({ message: "Internal Server Error" });
